@@ -1,1 +1,0 @@
-# Capacitor_viernes

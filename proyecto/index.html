@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #3a6186, #89253e);
+        }
+        
+        .calculator {
+            background-color: #222;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            width: 320px;
+        }
+        
+        .display {
+            background-color: #333;
+            color: white;
+            font-size: 2.5rem;
+            text-align: right;
+            padding: 20px;
+            height: 100px;
+            overflow: hidden;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: #444;
+        }
+        
+        button {
+            border: none;
+            font-size: 1.5rem;
+            height: 70px;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #666;
+        }
+        
+        button:active {
+            background-color: #777;
+        }
+        
+        .operator {
+            background-color: #ff9500;
+        }
+        
+        .operator:hover {
+            background-color: #ffaa33;
+        }
+        
+        .equals {
+            background-color: #ff9500;
+        }
+        
+        .equals:hover {
+            background-color: #ffaa33;
+        }
+        
+        .clear {
+            background-color: #a5a5a5;
+            color: black;
+        }
+        
+        .clear:hover {
+            background-color: #c5c5c5;
+        }
+        
+        .double {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button onclick="toggleSign()">+/-</button>
+            <button onclick="addPercent()">%</button>
+            <button class="operator" onclick="setOperation('/')">÷</button>
+            
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="setOperation('*')">×</button>
+            
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="setOperation('-')">-</button>
+            
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="setOperation('+')">+</button>
+            
+            <button class="double" onclick="appendNumber('0')">0</button>
+            <button onclick="appendDecimal()">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let resetScreen = false;
+        const display = document.getElementById('display');
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
+
+        function appendNumber(number) {
+            if (currentInput === '0' || resetScreen) {
+                currentInput = number;
+                resetScreen = false;
+            } else {
+                // Limitar la longitud para evitar desbordamiento
+                if (currentInput.length < 12) {
+                    currentInput += number;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            if (resetScreen) {
+                currentInput = '0.';
+                resetScreen = false;
+            } else if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            currentInput = (parseFloat(currentInput) * -1).toString();
+            updateDisplay();
+        }
+
+        function addPercent() {
+            currentInput = (parseFloat(currentInput) / 100).toString();
+            updateDisplay();
+        }
+
+        function setOperation(op) {
+            if (operation !== null) {
+                calculate();
+            }
+            previousInput = currentInput;
+            operation = op;
+            resetScreen = true;
+        }
+
+        function calculate() {
+            if (operation === null || resetScreen) {
+                return;
+            }
+            
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            
+            switch (operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        result = 'Error';
+                    } else {
+                        result = prev / current;
+                    }
+                    break;
+                default:
+                    return;
+            }
+            
+            // Redondear para evitar problemas de precisión con decimales
+            if (typeof result === 'number') {
+                // Limitar a 8 decimales máximo
+                result = parseFloat(result.toFixed(8));
+                // Eliminar ceros finales en decimales
+                result = result.toString();
+            }
+            
+            currentInput = result;
+            operation = null;
+            previousInput = '';
+            resetScreen = true;
+            updateDisplay();
+        }
+
+        // Inicializar la pantalla
+        updateDisplay();
+    </script>
+</body>
+</html>
